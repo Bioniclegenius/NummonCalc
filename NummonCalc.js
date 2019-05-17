@@ -32,7 +32,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         return num;
     },
 
-    getBestUniBuilding = function(log=false){
+    getBestUniBuilding: function(log=false){
         var validBuildings = ["unicornTomb","ivoryTower","ivoryCitadel","skyPalace","unicornUtopia","sunspire"];
         var pastureButton = this.getButton(0, "unicornPasture");
         var unicornsPerSecond = this.game.getEffect("unicornsPerTickBase") * this.game.getRateUI();
@@ -174,7 +174,11 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
             curCorruption = 0;
             corruptionRate = 0;
         }
-        return (corruptionRate * this.game.getRateUI()) + "/sec";
+        corruptionRate *= this.game.getRateUI();
+        corruptionRate = Math.floor(corruptionRate * 100000) / 100000;
+        if(corruptionRate == Infinity)
+            return "Infinity";
+        return corruptionRate + "/sec";
     },
 
     getNecrocornTime: function(){
