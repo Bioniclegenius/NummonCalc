@@ -32,7 +32,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         return num;
     },
 
-    getBestUniBuilding: function(){
+    getBestUniBuilding = function(log=false){
         var validBuildings = ["unicornTomb","ivoryTower","ivoryCitadel","skyPalace","unicornUtopia","sunspire"];
         var pastureButton = this.getButton(0, "unicornPasture");
         var unicornsPerSecond = this.game.getEffect("unicornsPerTickBase") * this.game.getRateUI();
@@ -51,11 +51,25 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         if(this.game.prestige.getPerk("unicornmancy").researched)
             riftChanceRatio *= 1.1;
         var baseRift = this.game.getEffect("riftChance") * riftChanceRatio / (10000 * 2) * baseUnicornsPerRift;
+        if(log){
+            console.log("Unicorns per second: "+total);
+            console.log("Base rift per second average: "+baseRift);
+        }
         var bestAmoritization = Infinity;
         var bestBuilding = "";
         var pastureAmor = this.game.bld.getBuildingExt("unicornPasture").meta.effects["unicornsPerTickBase"] * this.game.getRateUI();
         pastureAmor = pastureAmor * globalRatio * religionRatio * paragonRatio * faithBonus * cycle;
+        if(log){
+            console.log("unicornPasture");
+            console.log("\tBonus unicorns per second: "+pastureAmor);
+        }
         pastureAmor = this.game.tabs[0].buttons[pastureButton].model.prices[0].val / pastureAmor;
+        if(log){
+            var baseWait = gamePage.tabs[0].buttons[pastureButton].model.prices[0].val / total;
+            var avgWait = gamePage.tabs[0].buttons[pastureButton].model.prices[0].val / (total + baseRift);
+            console.log("\tMaximum time to build: " + gamePage.toDisplaySeconds(baseWait) + " | Average time to build: " + gamePage.toDisplaySeconds(avgWait));
+            console.log("\tPrice: "+gamePage.tabs[0].buttons[pastureButton].model.prices[0].val+" | Amortization: "+gamePage.toDisplaySeconds(pastureAmor));
+        }
         if(pastureAmor < bestAmoritization){
             bestAmoritization = pastureAmor;
             bestBuilding = "unicornPasture";
@@ -86,7 +100,20 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
                     var amor = unicornsPerSecond * globalRatio * relBonus * paragonRatio * faithBonus * cycle;
                     amor -= total;
                     amor = amor + riftBonus;
+                    if(log){
+                        console.log(btn.id);
+                        console.log("\tBonus unicorns per second: "+amor);
+                    }
                     amor = unicornPrice / amor;
+                    if(log){
+                        var baseWait = unicornPrice / total;
+                        var avgWait = unicornPrice / (total + baseRift);
+                        var amorSeconds = gamePage.toDisplaySeconds(amor);
+                        if(amorSeconds == "")
+                            amorSeconds = "NA";
+                        console.log("\tMaximum time to build: " + gamePage.toDisplaySeconds(baseWait) + " | Average time to build: " + gamePage.toDisplaySeconds(avgWait));
+                        console.log("\tPrice: "+unicornPrice + " | Amortization: "+amorSeconds);
+                    }
                     if(amor < bestAmoritization)
                         if(riftBonus > 0 || relBonus > religionRatio && unicornPrice > 0){
                             bestAmoritization = amor;
@@ -160,6 +187,8 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
             curCorruption = 0;
             corruptionRate = 0;
         }
+        if(corruptionRate == 0)
+            return Infinity;
         return this.game.toDisplaySeconds( (1 + corruptionRate - curCorruption) / (corruptionRate * this.game.getRateUI()) );
     },
 
@@ -621,7 +650,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     },
     {
         name: "getNecrocornsPerSecond",
-        title: "Necrocorns per Second",
+        title: "Necrocorns Per Second",
         val: 0,
     },
     {
