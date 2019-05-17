@@ -165,10 +165,11 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     getNecrocornsPerSecond: function(){
         var numAlicorns = this.game.resPool.get("alicorn").value;
         var curCorruption = this.game.religion.corruption;
+        var blsBoost = 1 + Math.sqrt(this.game.resPool.get("sorrow").value * this.game.getEffect("blsCorruptionRatio"));
         var corruptionRate = 1;
         if(this.game.resPool.get("necrocorn").value > 0)
             corruptionRate = 0.25 * (1+ this.game.getEffect("corruptionBoostRatio"));
-        corruptionRate *= this.game.getEffect("corruptionRatio");
+        corruptionRate *= this.game.getEffect("corruptionRatio") * blsBoost;
         if(numAlicorns <= 0){
             curCorruption = 0;
             corruptionRate = 0;
@@ -179,10 +180,11 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     getNecrocornTime: function(){
         var numAlicorns = this.game.resPool.get("alicorn").value;
         var curCorruption = this.game.religion.corruption;
+        var blsBoost = 1 + Math.sqrt(this.game.resPool.get("sorrow").value * this.game.getEffect("blsCorruptionRatio"));
         var corruptionRate = 1;
         if(this.game.resPool.get("necrocorn").value > 0)
-            corruptionRate = 0.25 * (1+ this.game.getEffect("corruptionBoostRatio"));
-        corruptionRate *= this.game.getEffect("corruptionRatio");
+            corruptionRate = 0.25 * (1 + this.game.getEffect("corruptionBoostRatio"));
+        corruptionRate *= this.game.getEffect("corruptionRatio") * blsBoost;
         if(numAlicorns <= 0){
             curCorruption = 0;
             corruptionRate = 0;
