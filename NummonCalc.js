@@ -190,7 +190,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
             corruptionRate = 0;
         }
         if(corruptionRate == 0)
-            return Infinity;
+            return "Infinity";
         return this.game.toDisplaySeconds( (1 - curCorruption) / (corruptionRate * this.game.getRateUI()) );
     },
 
