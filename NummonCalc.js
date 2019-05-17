@@ -191,7 +191,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         }
         if(corruptionRate == 0)
             return Infinity;
-        return this.game.toDisplaySeconds( (1 + corruptionRate - curCorruption) / (corruptionRate * this.game.getRateUI()) );
+        return this.game.toDisplaySeconds( (1 - curCorruption) / (corruptionRate * this.game.getRateUI()) );
     },
 
     getLeviChance: function(){
