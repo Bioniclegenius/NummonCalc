@@ -250,7 +250,10 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var titaniumPerTrade = this.getTitPerZebraTrade();
         var titToFill = this.game.resPool.get("titanium").maxValue;
         titToFill -= this.game.resPool.get("titanium").value;
-        return Math.ceil(titToFill / titaniumPerTrade);
+        titToFill = Math.ceil(titToFill / titaniumPerTrade);
+        if(titToFill < 0)
+            titToFill = 0;
+        return titToFill;
     },
 
     getTCPerSacrifice: function(){
