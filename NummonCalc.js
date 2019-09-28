@@ -636,6 +636,10 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         compCapFinal /= 10;
         return compCapFinal;
     },
+
+    getGflops: function(){
+        return game.resPool.get("gflops").value;
+    },
     
     //==============================================================================================================================================
     //Finally done with calculation functions, now to get down to adding it to the stats tab
@@ -740,6 +744,11 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     {
         name: "getBlazarsForShatterEngine",
         title: "Blazars for Shatter Engine",
+        val: 0,
+    },
+    {
+        name: "getGflops",
+        title: "GFlops",
         val: 0,
     },
     {
