@@ -35,7 +35,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     getBestUniBuilding: function(log=false){
         var validBuildings = ["unicornTomb","ivoryTower","ivoryCitadel","skyPalace","unicornUtopia","sunspire"];
         var pastureButton = this.getButton(0, "unicornPasture");
-        var unicornsPerSecond = this.game.getEffect("unicornsPerTickBase") * this.game.getRateUI();
+        var unicornsPerSecond = this.game.getEffect("unicornsPerTickBase") * this.game.getTicksPerSecondUI();
         var globalRatio = this.game.getEffect("unicornsGlobalRatio")+1;
         var religionRatio = this.game.getEffect("unicornsRatioReligion")+1;
         var paragonRatio = this.game.prestige.getParagonProductionRatio()+1;
@@ -57,7 +57,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         }
         var bestAmoritization = Infinity;
         var bestBuilding = "";
-        var pastureAmor = this.game.bld.getBuildingExt("unicornPasture").meta.effects["unicornsPerTickBase"] * this.game.getRateUI();
+        var pastureAmor = this.game.bld.getBuildingExt("unicornPasture").meta.effects["unicornsPerTickBase"] * this.game.getTicksPerSecondUI();
         pastureAmor = pastureAmor * globalRatio * religionRatio * paragonRatio * faithBonus * cycle;
         if(log){
             console.log("unicornPasture");
@@ -174,7 +174,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
             curCorruption = 0;
             corruptionRate = 0;
         }
-        corruptionRate *= this.game.getRateUI();
+        corruptionRate *= this.game.getTicksPerSecondUI();
         corruptionRate = Math.floor(corruptionRate * 100000) / 100000;
         if(corruptionRate == Infinity)
             return "Infinity";
@@ -195,7 +195,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         }
         if(corruptionRate == 0)
             return "Infinity";
-        return this.game.toDisplaySeconds( (1 - curCorruption) / (corruptionRate * this.game.getRateUI()) );
+        return this.game.toDisplaySeconds( (1 - curCorruption) / (corruptionRate * this.game.getTicksPerSecondUI()) );
     },
 
     getLeviChance: function(){
@@ -520,16 +520,16 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
                       "\nFinal theoretical catnip consumption: " + theoreticalCatnipConsumption +
                       "\nFinal actual catnip consumption: " + actualCatnipConsumption);
         //Adjust from Per Tick to Per Second
-        this.setCatnipArray(finalResult, this.game.getRateUI());
+        this.setCatnipArray(finalResult, this.game.getTicksPerSecondUI());
         var currentWeather = this.game.calendar.weather;
         if(currentWeather == null)
             currentWeather = "normal";
         var currentActual = finalResult["actual"][this.game.calendar.seasons[this.game.calendar.season].name][currentWeather];
         if(log)
             console.log("---CONVERSION FROM TICKS TO SECONDS---" +
-                      "\nNumber of ticks per second: " + this.game.getRateUI() +
+                      "\nNumber of ticks per second: " + this.game.getTicksPerSecondUI() +
                       "\nCurrent predicted actual catnip per second: " + currentActual +
-                      "\nCurrent actual catnip per second: " + (catnip.perTickCached * this.game.getRateUI()) +
+                      "\nCurrent actual catnip per second: " + (catnip.perTickCached * this.game.getTicksPerSecondUI()) +
                       "\nCatnip per second at cold winter: " + finalResult["actual"]["winter"]["cold"]);
         var theoreticalMatches = true;
         for(var season in finalResult["actual"])
@@ -539,8 +539,8 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         if(log)
             console.log("---FINAL SANITY CHECKS---" +
                       "\nDoes the theoretical result match the actual predicted result? " + (theoreticalMatches ? "Yes" : "No") +
-                      "\nDoes the actual predicted result match reality? " + (currentActual == (catnip.perTickCached * this.game.getRateUI()) ? "Yes" : "No") + 
-                      "\nDoes the actual predicted result closely match reality? " + ((Math.floor(currentActual * 10 + .5) == Math.floor(catnip.perTickCached * this.game.getRateUI() * 10 + .5)) ? "Yes" : "No"));
+                      "\nDoes the actual predicted result match reality? " + (currentActual == (catnip.perTickCached * this.game.getTicksPerSecondUI()) ? "Yes" : "No") + 
+                      "\nDoes the actual predicted result closely match reality? " + ((Math.floor(currentActual * 10 + .5) == Math.floor(catnip.perTickCached * this.game.getTicksPerSecondUI() * 10 + .5)) ? "Yes" : "No"));
         return finalResult;
     },
     
