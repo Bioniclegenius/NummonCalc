@@ -590,13 +590,15 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
                     sells[s.name] = amt;
                 }
                 else{
-                    var sratio = s.seasons[curSeason];
+                    var sratio = 1;
                     var tratio = ratio;
                     if(r.name == "leviathans")
                         tratio *= (1 + 0.02 * r.energy);
-                    var val = sratio * s.value * (1 - s.delta / 2);
+                    else
+                        sratio += s.seasons[curSeason];
+                    var val = sratio * s.value * (1 - s.width / 2);
                     max = val;
-                    max += Math.floor(s.value * sratio * s.delta);
+                    max += Math.floor(s.value * sratio * s.width);
                     val *= tratio;
                     min = val;
                     max *= tratio;
