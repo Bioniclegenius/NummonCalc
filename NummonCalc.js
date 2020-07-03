@@ -34,7 +34,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
 
     getBestUniBuilding: function(log=false){
         var pastureButton = this.getButton(0, "unicornPasture");
-        if(!this.game.tabs[0].buttons.includes(pastureButton))
+        if(typeof pastureButton === "undefined")
              return "No Building";
         var validBuildings = ["unicornTomb","ivoryTower","ivoryCitadel","skyPalace","unicornUtopia","sunspire"];
         var unicornsPerSecond = this.game.getEffect("unicornsPerTickBase") * this.game.getTicksPerSecondUI();
