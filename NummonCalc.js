@@ -41,7 +41,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var globalRatio = this.game.getEffect("unicornsGlobalRatio")+1;
         var religionRatio = this.game.getEffect("unicornsRatioReligion")+1;
         var paragonRatio = this.game.prestige.getParagonProductionRatio()+1;
-        var faithBonus = this.game.religion.getProductionBonus()/100+1;
+        var faithBonus = this.game.religion.getSolarRevolutionRatio()+1;
         var cycle = 1;
         if(this.game.calendar.cycles[this.game.calendar.cycle].festivalEffects["unicorns"]!=undefined)
             if(this.game.prestige.getPerk("numeromancy").researched && this.game.calendar.festivalDays)
@@ -414,7 +414,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         //Reactor production bonus - specifically does not affect catnip. Skipping.
         //=========================================================================================
         //SR Faith bonus
-        var srBonus = 1 + this.game.religion.getProductionBonus() / 100;
+        var srBonus = 1 + this.game.religion.getSolarRevolutionRatio();
         this.setCatnipArray(finalResult, srBonus);
         if(log)
             console.log("---SOLAR REVOLUTION MULTIPLIER---" +
