@@ -140,7 +140,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
 
     getPraiseLoss: function(){
         var tier = this.game.religion.transcendenceTier + 1;
-        var tt = game.religion.getTranscendenceRatio(tier) - game.religion.getTranscendenceRatio(tier - 1);
+        var tt = game.religion._getEpiphanyTotalPrice(tier) - game.religion._getEpiphanyTotalPrice(tier - 1);
         var perc = this.game.religion.faithRatio / tt * 100;
         var before = Math.round(this.game.religion.getTriValueReligion(tt * perc / 100) * 100);
         var after = Math.round(game.religion.getTriValueReligion(tt * (perc - 100) / 100) * 100);
