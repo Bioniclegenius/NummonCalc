@@ -463,7 +463,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var numUnicPastures = unicPastures.on;
         var theoreticalCatnipConsReduction = pastures.effects["catnipDemandRatio"] * numPastures;
         theoreticalCatnipConsReduction += unicPastures.effects["catnipDemandRatio"] * numUnicPastures;
-        theoreticalCatnipConsReduction = this.game.getHyperbolicEffect(theoreticalCatnipConsReduction, 1);
+        theoreticalCatnipConsReduction = this.game.getLimitedDR(theoreticalCatnipConsReduction, 1);
         var theoreticalReducedCatnipConsReduction = theoreticalCatnipConsReduction;
         theoreticalCatnipConsumption *= 1 + theoreticalCatnipConsReduction
         var theoreticalHappinessModifier = 0;
