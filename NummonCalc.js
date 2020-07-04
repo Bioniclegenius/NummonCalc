@@ -143,6 +143,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var tt = this.game.religion._getEpiphanyTotalPrice(tier) - game.religion._getEpiphanyTotalPrice(tier - 1);
         var perc = this.game.resPool.get("epiphany").value / tt * 100;
         perc = Math.round(perc * 1000) / 1000;
+        return perc + "%";
         /*
         ??? : 
         var before = Math.round(this.game.getUnlimitedDR(tt * perc / 100, 0.1) * 10);
