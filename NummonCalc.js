@@ -139,8 +139,8 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     },
 
     getPraiseLoss: function(){
-        var tier = this.game.religion.getTranscendenceLevel() + 1;
-        var tt=game.religion.getTranscendenceRatio(tier)-game.religion.getTranscendenceRatio(tier-1);
+        var tier = this.game.religion.transcendenceTier + 1;
+        var tt = game.religion.getTranscendenceRatio(tier) - game.religion.getTranscendenceRatio(tier - 1);
         var perc = this.game.religion.faithRatio / tt * 100;
         var before = Math.round(this.game.religion.getTriValueReligion(tt * perc / 100) * 100);
         var after = Math.round(game.religion.getTriValueReligion(tt * (perc - 100) / 100) * 100);
@@ -208,11 +208,11 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     },
 
     getReligionProductionBonusCap: function(){
-        var transcendTier = this.game.religion.getTranscendenceLevel();
+        var transcendTier = this.game.religion.transcendenceTier;
         var numObelisks = this.game.religion.getTU("blackObelisk").val;
         var atheismBonus = 0;
         if((this.game.challenges.getChallenge("atheism").researched))
-            atheismBonus = this.game.religion.getTranscendenceLevel() * 0.1;
+            atheismBonus = this.game.religion.transcendenceTier * 0.1;
         var result = 1000 * (transcendTier * numObelisks * .005 + atheismBonus + 1);
         return result + "%";
     },
@@ -633,7 +633,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var blackLibrary = this.game.religion.getTU("blackLibrary");
         if(this.game.prestige.getPerk("codexLeviathanianus").researched){
             var ttBoostRatio = (0.05 * (1 + blackLibrary.val * (blackLibrary.effects["compendiaTTBoostRatio"] + this.game.getEffect("blackLibraryBonus"))));
-            IWRatio *= (1 + ttBoostRatio * this.game.religion.getTranscendenceLevel());
+            IWRatio *= (1 + ttBoostRatio * this.game.religion.transcendenceTier);
         }
         
         var compCapFinal = scienceBldMax * IWRatio + compCap;
