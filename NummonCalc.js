@@ -140,8 +140,8 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
 
     getNextTranscendTierProgress: function(){
         var tier = this.game.religion.transcendenceTier + 1;
-        var tt = game.religion._getEpiphanyTotalPrice(tier) - game.religion._getEpiphanyTotalPrice(tier - 1);
-        var perc = this.game.religion.faithRatio / tt * 100;
+        var tt = this.game.religion._getEpiphanyTotalPrice(tier) - game.religion._getEpiphanyTotalPrice(tier - 1);
+        var perc = this.game.resPool.get("epiphany").value / tt * 100;
         var before = Math.round(this.game.getUnlimitedDR(tt * perc / 100, 0.1) * 10);
         var after = Math.round(this.game.getUnlimitedDR(tt * (perc - 100) / 100, 0.1) * 10);
         var loss = Math.round(before - after);
