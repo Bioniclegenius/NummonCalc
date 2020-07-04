@@ -142,11 +142,13 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var tier = this.game.religion.transcendenceTier + 1;
         var tt = this.game.religion._getEpiphanyTotalPrice(tier) - game.religion._getEpiphanyTotalPrice(tier - 1);
         var perc = this.game.resPool.get("epiphany").value / tt * 100;
-        var before = Math.round(this.game.getUnlimitedDR(tt * perc / 100, 0.1) * 10);
-        var after = Math.round(this.game.getUnlimitedDR(tt * (perc - 100) / 100, 0.1) * 10);
-        var loss = Math.round(before - after);
-        var lossRatio = 100 * loss / before;
         perc = Math.round(perc * 1000) / 1000;
+        /*
+        ??? : 
+        var before = Math.round(this.game.getUnlimitedDR(tt * perc / 100, 0.1) * 10);
+        var after = Math.round(this.game.getUnlimitedDR(Math.abs(tt * (perc - 100) / 100), 0.1) * 10);
+        var loss = - Math.round(before - after);
+        var lossRatio = 100 * loss / before;
         var str = "To tier: ";
         str += tier;
         str += "\n Progress: ";
@@ -161,6 +163,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         str += this.makeNiceString(lossRatio);
         str += "%";
         return str;
+        */
     },
     
     getNecrocornsPerSecond: function(){
