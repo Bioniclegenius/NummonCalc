@@ -142,8 +142,8 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var tier = this.game.religion.transcendenceTier + 1;
         var tt = game.religion._getEpiphanyTotalPrice(tier) - game.religion._getEpiphanyTotalPrice(tier - 1);
         var perc = this.game.religion.faithRatio / tt * 100;
-        var before = Math.round(this.game.religion.getTriValueReligion(this.game.getUnlimitedDR(tt * perc / 100, 0.1)) * 10);
-        var after = Math.round(this.game.religion.getTriValueReligion(this.game.getUnlimitedDR(tt * (perc - 100) / 100, 0.1)) * 10);
+        var before = Math.round(this.game.getUnlimitedDR(tt * perc / 100, 0.1) * 10);
+        var after = Math.round(this.game.getUnlimitedDR(tt * (perc - 100) / 100, 0.1) * 10);
         var loss = Math.round(before - after);
         var lossRatio = 100 * loss / before;
         perc = Math.round(perc * 1000) / 1000;
