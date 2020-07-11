@@ -34,7 +34,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
 
     getBestUniBuilding: function(log=false){
         var pastureButton = this.getButton(0, "unicornPasture");
-        if(!this.game.tabs[0].buttons.includes(pastureButton))
+        if(typeof pastureButton === "undefined")
              return "No Building";
         var validBuildings = ["unicornTomb","ivoryTower","ivoryCitadel","skyPalace","unicornUtopia","sunspire"];
         var unicornsPerSecond = this.game.getEffect("unicornsPerTickBase") * this.game.getTicksPerSecondUI();
@@ -138,17 +138,19 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         return 1 + this.game.getResCraftRatio({ name: "blueprint" });
     },
 
-    getPraiseLoss: function(){
-        var tier = this.game.religion.getTranscendenceLevel() + 1;
-        var tt=game.religion.getTranscendenceRatio(tier)-game.religion.getTranscendenceRatio(tier-1);
-        var perc = this.game.religion.faithRatio / tt * 100;
-        var before = Math.round(this.game.religion.getTriValueReligion(tt * perc / 100) * 100);
-        var after = Math.round(game.religion.getTriValueReligion(tt * (perc - 100) / 100) * 100);
-        var loss = Math.round(before - after);
-        var lossRatio = 100 * loss / before;
+    getNextTranscendTierProgress: function(){
+        var tier = this.game.religion.transcendenceTier + 1;
+        var tt = this.game.religion._getEpiphanyTotalPrice(tier) - game.religion._getEpiphanyTotalPrice(tier - 1);
+        var perc = this.game.resPool.get("epiphany").value / tt * 100;
         perc = Math.round(perc * 1000) / 1000;
         return perc + "%";
-        /*var str = "To tier: ";
+        /*
+        ??? : 
+        var before = Math.round(this.game.getUnlimitedDR(tt * perc / 100, 0.1) * 10);
+        var after = Math.round(this.game.getUnlimitedDR(Math.abs(tt * (perc - 100) / 100), 0.1) * 10);
+        var loss = - Math.round(before - after);
+        var lossRatio = 100 * loss / before;
+        var str = "To tier: ";
         str += tier;
         str += "\n Progress: ";
         str += this.makeNiceString(perc);
@@ -161,7 +163,8 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         str += "%\n Loss ratio: ";
         str += this.makeNiceString(lossRatio);
         str += "%";
-        return str;*/
+        return str;
+        */
     },
     
     getNecrocornsPerSecond: function(){
@@ -208,11 +211,11 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     },
 
     getReligionProductionBonusCap: function(){
-        var transcendTier = this.game.religion.getTranscendenceLevel();
+        var transcendTier = this.game.religion.transcendenceTier;
         var numObelisks = this.game.religion.getTU("blackObelisk").val;
         var atheismBonus = 0;
         if((this.game.challenges.getChallenge("atheism").researched))
-            atheismBonus = this.game.religion.getTranscendenceLevel() * 0.1;
+            atheismBonus = this.game.religion.transcendenceTier * 0.1;
         var result = 1000 * (transcendTier * numObelisks * .005 + atheismBonus + 1);
         return result + "%";
     },
@@ -463,7 +466,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var numUnicPastures = unicPastures.on;
         var theoreticalCatnipConsReduction = pastures.effects["catnipDemandRatio"] * numPastures;
         theoreticalCatnipConsReduction += unicPastures.effects["catnipDemandRatio"] * numUnicPastures;
-        theoreticalCatnipConsReduction = this.game.getHyperbolicEffect(theoreticalCatnipConsReduction, 1);
+        theoreticalCatnipConsReduction = this.game.getLimitedDR(theoreticalCatnipConsReduction, 1);
         var theoreticalReducedCatnipConsReduction = theoreticalCatnipConsReduction;
         theoreticalCatnipConsumption *= 1 + theoreticalCatnipConsReduction
         var theoreticalHappinessModifier = 0;
@@ -633,7 +636,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var blackLibrary = this.game.religion.getTU("blackLibrary");
         if(this.game.prestige.getPerk("codexLeviathanianus").researched){
             var ttBoostRatio = (0.05 * (1 + blackLibrary.val * (blackLibrary.effects["compendiaTTBoostRatio"] + this.game.getEffect("blackLibraryBonus"))));
-            IWRatio *= (1 + ttBoostRatio * this.game.religion.getTranscendenceLevel());
+            IWRatio *= (1 + ttBoostRatio * this.game.religion.transcendenceTier);
         }
         
         var compCapFinal = scienceBldMax * IWRatio + compCap;
@@ -686,7 +689,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         val: 0,
     },
     {
-        name: "getPraiseLoss",
+        name: "getNextTranscendTierProgress",
         title: "Progress to Next Transcendence Tier",
         val: 0,
     },
