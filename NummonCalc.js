@@ -799,7 +799,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     }
 });
 
-dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabManager, {
+dojo.declare("classes.managers.TestStatsManager", com.nuclearunicorn.core.TabManager, {
     
     game: null,
     
