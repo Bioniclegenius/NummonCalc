@@ -483,6 +483,19 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         }
         return bestBuilding;
     },
+
+    getBestAliBuilding: function() {
+        var bestBuilding = ["None", "Sky Palace", "Unicorn Utopia", "Sunspire"];
+        if(!this.game.religion.getZU("skyPalace").unlocked)
+            return bestBuilding[0];
+            
+        var skyPalacePrice = this.game.religion.getZU("skyPalace").val * 1.15 * 125;
+        var unicornUtopiaPrice = this.game.religion.getZU("unicornUtopia").val* 1.15 * 1000;
+        var sunspirePrice = this.game.religion.getZU("sunspire").val* 1.15 * 750;
+        var priceBuilding = [skyPalacePrice, unicornUtopiaPrice, sunspirePrice];
+
+        return bestBuilding[ priceBuilding.indexOf(Math.max(...priceBuilding)) + 1 ];
+    },
     
     getNecrocornsPerSecond: function(){
         var numAlicorns = this.game.resPool.get("alicorn").value;
@@ -731,6 +744,11 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
             {
                 name: "getBestUniBuilding",
                 title: "Best Unicorn Building",
+                val: 0,
+            },
+            {
+                name: "getBestAliBuilding",
+                title: "Best Alicorn Builing Per Ivory Cost",
                 val: 0,
             },
             {
