@@ -549,7 +549,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         if((this.game.challenges.getChallenge("atheism").researched))
             atheismBonus = this.game.religion.transcendenceTier * 0.1;
         var result = 1000 * (transcendTier * numObelisks * .005 + atheismBonus + 1);
-        return result + "%";
+        return this.roundThisNumber(result) + "%";
     },
 
     getApocryphaProgress: function(){
