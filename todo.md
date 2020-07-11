@@ -34,4 +34,4 @@ Time :
  
 Others :
 - Uranium/Sec for Thorium Reactors :
-- **To Add** Best Magneto/Steamwork Building :
+- Best Magneto/Steamwork Building :
