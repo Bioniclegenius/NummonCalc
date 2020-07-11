@@ -485,7 +485,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     },
 
     getBestAliBuilding: function() {
-        var bestBuilding = ["None", "Sky Palace", "Unicorn Utopia", "Sunspire"];
+        var bestBuilding = ["No building", "Sky Palace", "Unicorn Utopia", "Sunspire"];
         if(!this.game.religion.getZU("skyPalace").unlocked)
             return bestBuilding[0];
             
@@ -655,7 +655,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     // OTHERS : 
 
     getBestMagnetoBuilding: function() {
-        var bestBuilding = ["None", "Magneto", "Steamworks"]
+        var bestBuilding = ["No building", "Magneto", "Steamworks"];
         var magneto = this.game.bld.getBuildingExt("magneto").meta;
         var steamworks = this.game.bld.getBuildingExt("steamworks").meta;
         if(!magneto.unlocked || !steamworks.unlocked)
