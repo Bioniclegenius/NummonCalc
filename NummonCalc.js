@@ -485,7 +485,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     },
 
     getBestAliBuilding: function() {
-        var bestBuilding = ["No building", "Sky Palace", "Unicorn Utopia", "Sunspire"];
+        var bestBuilding = ["No Building", "Sky Palace", "Unicorn Utopia", "Sunspire"];
         if(!this.game.religion.getZU("skyPalace").unlocked)
             return bestBuilding[0];
             
@@ -655,7 +655,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     // OTHERS : 
 
     getBestMagnetoBuilding: function() {
-        var bestBuilding = ["No building", "Magneto", "Steamworks"];
+        var bestBuilding = ["No Building", "Magneto", "Steamworks"];
         var magneto = this.game.bld.getBuildingExt("magneto").meta;
         var steamworks = this.game.bld.getBuildingExt("steamworks").meta;
         if(!magneto.unlocked || !steamworks.unlocked)
@@ -692,12 +692,12 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         catnip: [
             {
                 name: "getCatnipInWarmSpring",
-                title: "Catnip/sec during Warm Spring",
+                title: "During Warm Spring",
                 val: 0,
             },
             {
                 name: "getCatnipColdWinter",
-                title: "Catnip/sec during Cold Winter",
+                title: "During Cold Winter",
                 val: 0,
             }
         ],
@@ -748,7 +748,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
             },
             {
                 name: "getBestAliBuilding",
-                title: "Best Alicorn Builing Per Ivory Cost",
+                title: "Best Alicorn Building Per Ivory Cost",
                 val: 0,
             },
             {
@@ -835,7 +835,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     statDefinitions : [
         {
             name: "catnip",
-            title: "Catnip"
+            title: "Catnip / Sec"
         },
         {
             name: "science",
