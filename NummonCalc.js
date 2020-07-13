@@ -494,7 +494,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var sunspirePrice = this.game.religion.getZU("sunspire").val* 1.15 * 750;
         var priceBuilding = [skyPalacePrice, unicornUtopiaPrice, sunspirePrice];
 
-        return bestBuilding[ priceBuilding.indexOf(Math.max(...priceBuilding)) + 1 ];
+        return bestBuilding[ priceBuilding.indexOf(Math.min(...priceBuilding)) + 1 ];
     },
     
     getNecrocornsPerSecond: function(){
