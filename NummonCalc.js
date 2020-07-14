@@ -361,7 +361,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     },
 
     getBlueprintCraft: function(){
-        return 1 + this.game.getResCraftRatio({ name: "blueprint" });
+        return 1 + this.game.getResCraftRatio("blueprint");
     },
 
     // TITANIUM :
