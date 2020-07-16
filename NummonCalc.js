@@ -491,7 +491,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
             
         var skyPalacePrice =  1.15**(this.game.religion.getZU("skyPalace").val) * 125;
         var unicornUtopiaPrice = 1.15**(this.game.religion.getZU("unicornUtopia").val) * 1000;
-        var sunspirePrice = 1.15**(this.game.religion.getZU("sunspire").val) * 1750;
+        var sunspirePrice = 1.15**(this.game.religion.getZU("sunspire").val) * 750;
         var priceBuilding = [skyPalacePrice, unicornUtopiaPrice, sunspirePrice];
 
         return bestBuilding[ priceBuilding.indexOf(Math.min(...priceBuilding)) + 1 ];
