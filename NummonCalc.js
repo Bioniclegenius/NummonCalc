@@ -489,9 +489,9 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         if(!this.game.religion.getZU("skyPalace").unlocked)
             return bestBuilding[0];
             
-        var skyPalacePrice = this.game.religion.getZU("skyPalace").val * 1.15 * 125;
-        var unicornUtopiaPrice = this.game.religion.getZU("unicornUtopia").val* 1.15 * 1000;
-        var sunspirePrice = this.game.religion.getZU("sunspire").val* 1.15 * 750;
+        var skyPalacePrice =  1.15**(this.game.religion.getZU("skyPalace").val) * 125;
+        var unicornUtopiaPrice = 1.15**(this.game.religion.getZU("unicornUtopia").val) * 1000;
+        var sunspirePrice = 1.15**(this.game.religion.getZU("sunspire").val) * 1750;
         var priceBuilding = [skyPalacePrice, unicornUtopiaPrice, sunspirePrice];
 
         return bestBuilding[ priceBuilding.indexOf(Math.min(...priceBuilding)) + 1 ];
