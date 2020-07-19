@@ -32,250 +32,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         return num;
     },
 
-    getBestUniBuilding: function(log=false){
-        var pastureButton = this.getButton(0, "unicornPasture");
-        if(typeof pastureButton === "undefined")
-             return "No Building";
-        var validBuildings = ["unicornTomb","ivoryTower","ivoryCitadel","skyPalace","unicornUtopia","sunspire"];
-        var unicornsPerSecond = this.game.getEffect("unicornsPerTickBase") * this.game.getTicksPerSecondUI();
-        var globalRatio = this.game.getEffect("unicornsGlobalRatio")+1;
-        var religionRatio = this.game.getEffect("unicornsRatioReligion")+1;
-        var paragonRatio = this.game.prestige.getParagonProductionRatio()+1;
-        var faithBonus = this.game.religion.getSolarRevolutionRatio()+1;
-        var cycle = 1;
-        if(this.game.calendar.cycles[this.game.calendar.cycle].festivalEffects["unicorns"]!=undefined)
-            if(this.game.prestige.getPerk("numeromancy").researched && this.game.calendar.festivalDays)
-                cycle=this.game.calendar.cycles[this.game.calendar.cycle].festivalEffects["unicorns"];
-        var onZig = Math.max(this.game.bld.getBuildingExt("ziggurat").meta.on,1);
-        var total = unicornsPerSecond * globalRatio * religionRatio * paragonRatio * faithBonus * cycle;
-        var baseUnicornsPerRift = 500 * (1 + this.game.getEffect("unicornsRatioReligion") * 0.1);
-        var riftChanceRatio = 1;
-        if(this.game.prestige.getPerk("unicornmancy").researched)
-            riftChanceRatio *= 1.1;
-        var baseRift = this.game.getEffect("riftChance") * riftChanceRatio / (10000 * 2) * baseUnicornsPerRift;
-        if(log){
-            console.log("Unicorns per second: "+total);
-            console.log("Base rift per second average: "+baseRift);
-        }
-        var bestAmoritization = Infinity;
-        var bestBuilding = "";
-        var pastureAmor = this.game.bld.getBuildingExt("unicornPasture").meta.effects["unicornsPerTickBase"] * this.game.getTicksPerSecondUI();
-        pastureAmor = pastureAmor * globalRatio * religionRatio * paragonRatio * faithBonus * cycle;
-        if(log){
-            console.log("unicornPasture");
-            console.log("\tBonus unicorns per second: "+pastureAmor);
-        }
-        pastureAmor = this.game.tabs[0].buttons[pastureButton].model.prices[0].val / pastureAmor;
-        if(log){
-            var baseWait = gamePage.tabs[0].buttons[pastureButton].model.prices[0].val / total;
-            var avgWait = gamePage.tabs[0].buttons[pastureButton].model.prices[0].val / (total + baseRift);
-            console.log("\tMaximum time to build: " + gamePage.toDisplaySeconds(baseWait) + " | Average time to build: " + gamePage.toDisplaySeconds(avgWait));
-            console.log("\tPrice: "+gamePage.tabs[0].buttons[pastureButton].model.prices[0].val+" | Amortization: "+gamePage.toDisplaySeconds(pastureAmor));
-        }
-        if(pastureAmor < bestAmoritization){
-            bestAmoritization = pastureAmor;
-            bestBuilding = "unicornPasture";
-        }
-        for(var i in this.game.tabs[5].zgUpgradeButtons){
-            var btn = this.game.tabs[5].zgUpgradeButtons[i];
-            if(validBuildings.indexOf(btn.id)!=-1){
-                if(btn.model.visible){
-                    unicornPrice = 0;
-                    for(var j in btn.model.prices){
-                        if(btn.model.prices[j].name=="unicorns")
-                            unicornPrice += btn.model.prices[j].val;
-                        if(btn.model.prices[j].name=="tears")
-                            unicornPrice += btn.model.prices[j].val * 2500 / onZig;
-                    }
-                    var bld=this.game.religion.getZU(btn.id);
-                    var relBonus = religionRatio;
-                    var riftChance = this.game.getEffect("riftChance");
-                    for(var j in bld.effects){
-                        if(j=="unicornsRatioReligion")
-                            relBonus += bld.effects[j]
-                        if(j=="riftChance")
-                            riftChance += bld.effects[j];
-                    }
-                    var unicornsPerRift = 500 * ((relBonus -1) * 0.1 +1);
-                    var riftBonus = riftChance * riftChanceRatio / (10000 * 2) * unicornsPerRift;
-                    riftBonus -= baseRift;
-                    var amor = unicornsPerSecond * globalRatio * relBonus * paragonRatio * faithBonus * cycle;
-                    amor -= total;
-                    amor = amor + riftBonus;
-                    if(log){
-                        console.log(btn.id);
-                        console.log("\tBonus unicorns per second: "+amor);
-                    }
-                    amor = unicornPrice / amor;
-                    if(log){
-                        var baseWait = unicornPrice / total;
-                        var avgWait = unicornPrice / (total + baseRift);
-                        var amorSeconds = gamePage.toDisplaySeconds(amor);
-                        if(amorSeconds == "")
-                            amorSeconds = "NA";
-                        console.log("\tMaximum time to build: " + gamePage.toDisplaySeconds(baseWait) + " | Average time to build: " + gamePage.toDisplaySeconds(avgWait));
-                        console.log("\tPrice: "+unicornPrice + " | Amortization: "+amorSeconds);
-                    }
-                    if(amor < bestAmoritization)
-                        if(riftBonus > 0 || relBonus > religionRatio && unicornPrice > 0){
-                            bestAmoritization = amor;
-                            bestBuilding = btn.id;
-                        }
-                }
-            }
-        }
-        return bestBuilding;
-    },
-
-    getUraniumForThoriumReactors: function(){
-        var needed = 250 * .1875 * this.game.bld.getBuildingExt("reactor").meta.val;
-        needed /= 1 + this.game.getResCraftRatio({name:"thorium"});
-        needed = Math.round(needed * 1000) / 1000;
-        return needed;
-    },
-
-    getBlueprintCraft: function(){
-        return 1 + this.game.getResCraftRatio({ name: "blueprint" });
-    },
-
-    getNextTranscendTierProgress: function(){
-        var tier = this.game.religion.transcendenceTier + 1;
-        var tt = this.game.religion._getEpiphanyTotalPrice(tier) - game.religion._getEpiphanyTotalPrice(tier - 1);
-        var perc = this.game.resPool.get("epiphany").value / tt * 100;
-        perc = Math.round(perc * 1000) / 1000;
-        return perc + "%";
-        /*
-        ??? : 
-        var before = Math.round(this.game.getUnlimitedDR(tt * perc / 100, 0.1) * 10);
-        var after = Math.round(this.game.getUnlimitedDR(Math.abs(tt * (perc - 100) / 100), 0.1) * 10);
-        var loss = - Math.round(before - after);
-        var lossRatio = 100 * loss / before;
-        var str = "To tier: ";
-        str += tier;
-        str += "\n Progress: ";
-        str += this.makeNiceString(perc);
-        str += "%\n Before: ";
-        str += this.makeNiceString(before);
-        str += "%\n After: ";
-        str += this.makeNiceString(after);
-        str += "%\n Loss: ";
-        str += this.makeNiceString(loss);
-        str += "%\n Loss ratio: ";
-        str += this.makeNiceString(lossRatio);
-        str += "%";
-        return str;
-        */
-    },
-    
-    getNecrocornsPerSecond: function(){
-        var numAlicorns = this.game.resPool.get("alicorn").value;
-        var curCorruption = this.game.religion.corruption;
-        var blsBoost = 1 + Math.sqrt(this.game.resPool.get("sorrow").value * this.game.getEffect("blsCorruptionRatio"));
-        var corruptionRate = 1;
-        if(this.game.resPool.get("necrocorn").value > 0)
-            corruptionRate = 0.25 * (1+ this.game.getEffect("corruptionBoostRatio"));
-        corruptionRate *= this.game.getEffect("corruptionRatio") * blsBoost;
-        if(numAlicorns <= 0){
-            curCorruption = 0;
-            corruptionRate = 0;
-        }
-        corruptionRate *= this.game.getTicksPerSecondUI();
-        corruptionRate = Math.floor(corruptionRate * 100000) / 100000;
-        if(corruptionRate == Infinity)
-            return "Infinity";
-        return corruptionRate + "/sec";
-    },
-
-    getNecrocornTime: function(){
-        var numAlicorns = this.game.resPool.get("alicorn").value;
-        var curCorruption = this.game.religion.corruption;
-        var blsBoost = 1 + Math.sqrt(this.game.resPool.get("sorrow").value * this.game.getEffect("blsCorruptionRatio"));
-        var corruptionRate = 1;
-        if(this.game.resPool.get("necrocorn").value > 0)
-            corruptionRate = 0.25 * (1 + this.game.getEffect("corruptionBoostRatio"));
-        corruptionRate *= this.game.getEffect("corruptionRatio") * blsBoost;
-        if(numAlicorns <= 0){
-            curCorruption = 0;
-            corruptionRate = 0;
-        }
-        if(corruptionRate == 0)
-            return "Infinity";
-        return this.game.toDisplaySeconds( (1 - curCorruption) / (corruptionRate * this.game.getTicksPerSecondUI()) );
-    },
-
-    getLeviChance: function(){
-        var numPyramids = this.game.religion.getZU("blackPyramid").val;
-        var numMarkers = this.game.religion.getZU("marker").val;
-        var chance = this.roundThisNumber(35 * numPyramids * (1 + 0.1 * numMarkers) / 10);
-        return chance + "%";
-    },
-
-    getReligionProductionBonusCap: function(){
-        var transcendTier = this.game.religion.transcendenceTier;
-        var numObelisks = this.game.religion.getTU("blackObelisk").val;
-        var atheismBonus = 0;
-        if((this.game.challenges.getChallenge("atheism").researched))
-            atheismBonus = this.game.religion.transcendenceTier * 0.1;
-        var result = 1000 * (transcendTier * numObelisks * .005 + atheismBonus + 1);
-        return result + "%";
-    },
-    
-    getCelestialPerDay: function(){
-        var chanceRatio = 1;
-        if(this.game.prestige.getPerk("chronomancy").researched)
-            chanceRatio *= 1.1;
-        chanceRatio *= 1 + this.game.getEffect("timeRatio") * 0.25;
-        
-        var chance = 25;
-        chance += this.game.getEffect("starEventChance") * 10000;
-        chance *= chanceRatio;
-        if(this.game.prestige.getPerk("astromancy").researched)
-            chance *= 2;
-        
-        chance = Math.round(chance);
-        chance /= 100;//It's out of 10,000 originally
-        return chance + "%";
-    },
-    
-    getCelestialAutoSuccess: function(){
-        var autoChance = this.game.getEffect("starAutoSuccessChance") * 100;
-        if(this.game.prestige.getPerk("astromancy").researched)
-            autoChance *= 2;
-        if(autoChance > 100)
-            autoChance = 100;
-        return autoChance + "%";
-    },
-    
-    getTitPerZebraTrade: function(){
-        var titaniumPerTrade = this.game.resPool.get("ship").value / 100 * 1.5 * 2 + 1.5;
-        return titaniumPerTrade;
-    },
-    
-    getZebraTradesToMaxTit: function(){
-        var titaniumPerTrade = this.getTitPerZebraTrade();
-        var maxTitanium = this.game.resPool.get("titanium").maxValue;
-        return Math.ceil(maxTitanium / titaniumPerTrade);
-    },
-    
-    getZebraTradesLeftToMaxTit: function(){
-        var titaniumPerTrade = this.getTitPerZebraTrade();
-        var titToFill = this.game.resPool.get("titanium").maxValue;
-        titToFill -= this.game.resPool.get("titanium").value;
-        titToFill = Math.ceil(titToFill / titaniumPerTrade);
-        if(titToFill < 0)
-            titToFill = 0;
-        return titToFill;
-    },
-
-    getTCPerSacrifice: function(){
-        var numTCPerSacrifice = 1;
-        numTCPerSacrifice += this.game.getEffect("tcRefineRatio");
-        return numTCPerSacrifice;
-    },
-
-    getRelicPerTCRefine: function(){
-        return 1 + game.getEffect("relicRefineRatio") * game.religion.getZU("blackPyramid").val;
-    },
+    // CATNIP :
 
     setCatnipArray: function(finalResult, theoreticalQuantity, actualQuantity, operation = "*"){
         actualQuantity = actualQuantity || theoreticalQuantity;
@@ -559,6 +316,261 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         return catnip;
     },
 
+    // SCIENCE :
+  
+    getCelestialPerDay: function(){
+        var chanceRatio = 1;
+        if(this.game.prestige.getPerk("chronomancy").researched)
+            chanceRatio *= 1.1;
+        chanceRatio *= 1 + this.game.getEffect("timeRatio") * 0.25;
+        
+        var chance = 25;
+        chance += this.game.getEffect("starEventChance") * 10000;
+        chance *= chanceRatio;
+        if(this.game.prestige.getPerk("astromancy").researched)
+            chance *= 2;
+        
+        chance = Math.round(chance);
+        chance /= 100;//It's out of 10,000 originally
+        return chance + "%";
+    },
+    
+    getCelestialAutoSuccess: function(){
+        var autoChance = this.game.getEffect("starAutoSuccessChance") * 100;
+        if(this.game.prestige.getPerk("astromancy").researched)
+            autoChance *= 2;
+        if(autoChance > 100)
+            autoChance = 100;
+        return autoChance + "%";
+    },
+        
+    getMaxComped: function(){
+        var scienceBldMax = this.game.bld.getEffect("scienceMax");
+        var compCap = this.game.bld.getEffect("scienceMaxCompendia");
+        
+        var IWRatio = this.game.ironWill ? 10 : 1;
+        var blackLibrary = this.game.religion.getTU("blackLibrary");
+        if(this.game.prestige.getPerk("codexLeviathanianus").researched){
+            var ttBoostRatio = (0.05 * (1 + blackLibrary.val * (blackLibrary.effects["compendiaTTBoostRatio"] + this.game.getEffect("blackLibraryBonus"))));
+            IWRatio *= (1 + ttBoostRatio * this.game.religion.transcendenceTier);
+        }
+        
+        var compCapFinal = scienceBldMax * IWRatio + compCap;
+        compCapFinal /= 10;
+        return compCapFinal;
+    },
+
+    getBlueprintCraft: function(){
+        return 1 + this.game.getResCraftRatio("blueprint");
+    },
+
+    // TITANIUM :
+
+    getTitPerZebraTrade: function(){
+        var titaniumPerTrade = this.game.resPool.get("ship").value / 100 * 1.5 * 2 + 1.5;
+        return titaniumPerTrade;
+    },
+    
+    getZebraTradesToMaxTit: function(){
+        var titaniumPerTrade = this.getTitPerZebraTrade();
+        var maxTitanium = this.game.resPool.get("titanium").maxValue;
+        return Math.ceil(maxTitanium / titaniumPerTrade);
+    },
+    
+    getZebraTradesLeftToMaxTit: function(){
+        var titaniumPerTrade = this.getTitPerZebraTrade();
+        var titToFill = this.game.resPool.get("titanium").maxValue;
+        titToFill -= this.game.resPool.get("titanium").value;
+        titToFill = Math.ceil(titToFill / titaniumPerTrade);
+        if(titToFill < 0)
+            titToFill = 0;
+        return titToFill;
+    },
+
+    // UNICORN :
+
+    getBestUniBuilding: function(log=false){
+        var pastureButton = this.getButton(0, "unicornPasture");
+        if(typeof pastureButton === "undefined")
+             return "No Building";
+        var validBuildings = ["unicornTomb","ivoryTower","ivoryCitadel","skyPalace","unicornUtopia","sunspire"];
+        var unicornsPerSecond = this.game.getEffect("unicornsPerTickBase") * this.game.getTicksPerSecondUI();
+        var globalRatio = this.game.getEffect("unicornsGlobalRatio")+1;
+        var religionRatio = this.game.getEffect("unicornsRatioReligion")+1;
+        var paragonRatio = this.game.prestige.getParagonProductionRatio()+1;
+        var faithBonus = this.game.religion.getSolarRevolutionRatio()+1;
+        var cycle = 1;
+        if(this.game.calendar.cycles[this.game.calendar.cycle].festivalEffects["unicorns"]!=undefined)
+            if(this.game.prestige.getPerk("numeromancy").researched && this.game.calendar.festivalDays)
+                cycle=this.game.calendar.cycles[this.game.calendar.cycle].festivalEffects["unicorns"];
+        var onZig = Math.max(this.game.bld.getBuildingExt("ziggurat").meta.on,1);
+        var total = unicornsPerSecond * globalRatio * religionRatio * paragonRatio * faithBonus * cycle;
+        var baseUnicornsPerRift = 500 * (1 + this.game.getEffect("unicornsRatioReligion") * 0.1);
+        var riftChanceRatio = 1;
+        if(this.game.prestige.getPerk("unicornmancy").researched)
+            riftChanceRatio *= 1.1;
+        var baseRift = this.game.getEffect("riftChance") * riftChanceRatio / (10000 * 2) * baseUnicornsPerRift;
+        if(log){
+            console.log("Unicorns per second: "+total);
+            console.log("Base rift per second average: "+baseRift);
+        }
+        var bestAmoritization = Infinity;
+        var bestBuilding = "";
+        var pastureAmor = this.game.bld.getBuildingExt("unicornPasture").meta.effects["unicornsPerTickBase"] * this.game.getTicksPerSecondUI();
+        pastureAmor = pastureAmor * globalRatio * religionRatio * paragonRatio * faithBonus * cycle;
+        if(log){
+            console.log("unicornPasture");
+            console.log("\tBonus unicorns per second: "+pastureAmor);
+        }
+        pastureAmor = this.game.tabs[0].buttons[pastureButton].model.prices[0].val / pastureAmor;
+        if(log){
+            var baseWait = gamePage.tabs[0].buttons[pastureButton].model.prices[0].val / total;
+            var avgWait = gamePage.tabs[0].buttons[pastureButton].model.prices[0].val / (total + baseRift);
+            console.log("\tMaximum time to build: " + gamePage.toDisplaySeconds(baseWait) + " | Average time to build: " + gamePage.toDisplaySeconds(avgWait));
+            console.log("\tPrice: "+gamePage.tabs[0].buttons[pastureButton].model.prices[0].val+" | Amortization: "+gamePage.toDisplaySeconds(pastureAmor));
+        }
+        if(pastureAmor < bestAmoritization){
+            bestAmoritization = pastureAmor;
+            bestBuilding = "unicornPasture";
+        }
+        for(var i in this.game.tabs[5].zgUpgradeButtons){
+            var btn = this.game.tabs[5].zgUpgradeButtons[i];
+            if(validBuildings.indexOf(btn.id)!=-1){
+                if(btn.model.visible){
+                    unicornPrice = 0;
+                    for(var j in btn.model.prices){
+                        if(btn.model.prices[j].name=="unicorns")
+                            unicornPrice += btn.model.prices[j].val;
+                        if(btn.model.prices[j].name=="tears")
+                            unicornPrice += btn.model.prices[j].val * 2500 / onZig;
+                    }
+                    var bld=this.game.religion.getZU(btn.id);
+                    var relBonus = religionRatio;
+                    var riftChance = this.game.getEffect("riftChance");
+                    for(var j in bld.effects){
+                        if(j=="unicornsRatioReligion")
+                            relBonus += bld.effects[j]
+                        if(j=="riftChance")
+                            riftChance += bld.effects[j];
+                    }
+                    var unicornsPerRift = 500 * ((relBonus -1) * 0.1 +1);
+                    var riftBonus = riftChance * riftChanceRatio / (10000 * 2) * unicornsPerRift;
+                    riftBonus -= baseRift;
+                    var amor = unicornsPerSecond * globalRatio * relBonus * paragonRatio * faithBonus * cycle;
+                    amor -= total;
+                    amor = amor + riftBonus;
+                    if(log){
+                        console.log(btn.id);
+                        console.log("\tBonus unicorns per second: "+amor);
+                    }
+                    amor = unicornPrice / amor;
+                    if(log){
+                        var baseWait = unicornPrice / total;
+                        var avgWait = unicornPrice / (total + baseRift);
+                        var amorSeconds = gamePage.toDisplaySeconds(amor);
+                        if(amorSeconds == "")
+                            amorSeconds = "NA";
+                        console.log("\tMaximum time to build: " + gamePage.toDisplaySeconds(baseWait) + " | Average time to build: " + gamePage.toDisplaySeconds(avgWait));
+                        console.log("\tPrice: "+unicornPrice + " | Amortization: "+amorSeconds);
+                    }
+                    if(amor < bestAmoritization)
+                        if(riftBonus > 0 || relBonus > religionRatio && unicornPrice > 0){
+                            bestAmoritization = amor;
+                            bestBuilding = btn.id;
+                        }
+                }
+            }
+        }
+        return bestBuilding;
+    },
+
+    getBestAliBuilding: function() {
+        var bestBuilding = ["No Building", "Sky Palace", "Unicorn Utopia", "Sunspire"];
+        if(!this.game.religion.getZU("skyPalace").unlocked)
+            return bestBuilding[0];
+            
+        var skyPalacePrice =  1.15**(this.game.religion.getZU("skyPalace").val) * 125;
+        var unicornUtopiaPrice = 1.15**(this.game.religion.getZU("unicornUtopia").val) * 1000;
+        var sunspirePrice = 1.15**(this.game.religion.getZU("sunspire").val) * 750;
+        var priceBuilding = [skyPalacePrice, unicornUtopiaPrice, sunspirePrice];
+
+        return bestBuilding[ priceBuilding.indexOf(Math.min(...priceBuilding)) + 1 ];
+    },
+    
+    getNecrocornsPerSecond: function(){
+        var numAlicorns = this.game.resPool.get("alicorn").value;
+        var curCorruption = this.game.religion.corruption;
+        var blsBoost = 1 + Math.sqrt(this.game.resPool.get("sorrow").value * this.game.getEffect("blsCorruptionRatio"));
+        var corruptionRate = 1;
+        if(this.game.resPool.get("necrocorn").value > 0)
+            corruptionRate = 0.25 * (1+ this.game.getEffect("corruptionBoostRatio"));
+        corruptionRate *= this.game.getEffect("corruptionRatio") * blsBoost;
+        if(numAlicorns <= 0){
+            curCorruption = 0;
+            corruptionRate = 0;
+        }
+        corruptionRate *= this.game.getTicksPerSecondUI();
+        corruptionRate = Math.floor(corruptionRate * 100000) / 100000;
+        if(corruptionRate == Infinity)
+            return "Infinity";
+        return corruptionRate + "/sec";
+    },
+
+    getNecrocornTime: function(){
+        var numAlicorns = this.game.resPool.get("alicorn").value;
+        var curCorruption = this.game.religion.corruption;
+        var blsBoost = 1 + Math.sqrt(this.game.resPool.get("sorrow").value * this.game.getEffect("blsCorruptionRatio"));
+        var corruptionRate = 1;
+        if(this.game.resPool.get("necrocorn").value > 0)
+            corruptionRate = 0.25 * (1 + this.game.getEffect("corruptionBoostRatio"));
+        corruptionRate *= this.game.getEffect("corruptionRatio") * blsBoost;
+        if(numAlicorns <= 0){
+            curCorruption = 0;
+            corruptionRate = 0;
+        }
+        if(corruptionRate == 0)
+            return "Infinity";
+        return this.game.toDisplaySeconds( (1 - curCorruption) / (corruptionRate * this.game.getTicksPerSecondUI()) );
+    },
+
+    getLeviChance: function(){
+        var numPyramids = this.game.religion.getZU("blackPyramid").val;
+        var numMarkers = this.game.religion.getZU("marker").val;
+        var chance = this.roundThisNumber(35 * numPyramids * (1 + 0.1 * numMarkers) / 10);
+        return chance + "%";
+    },
+
+    // RELIGION :
+
+    getReligionProductionBonusCap: function(){
+        var transcendTier = this.game.religion.transcendenceTier;
+        var numObelisks = this.game.religion.getTU("blackObelisk").val;
+        var atheismBonus = 0;
+        if((this.game.challenges.getChallenge("atheism").researched))
+            atheismBonus = this.game.religion.transcendenceTier * 0.1;
+        var result = 1000 * (transcendTier * numObelisks * .005 + atheismBonus + 1);
+        return this.roundThisNumber(result) + "%";
+    },
+
+    getApocryphaProgress: function(){
+        var tier = this.game.religion.transcendenceTier + 1;
+        var tt = this.game.religion._getTranscendTotalPrice(tier) - game.religion._getTranscendTotalPrice(tier - 1);
+        var worship = this.game.resPool.get("worship").value / 1000000 * tier * tier * 1.01;
+        var perc = worship / tt * 100;
+        perc = Math.round(perc * 1000) / 1000;
+        return perc + "%";
+    },
+
+    getNextTranscendTierProgress: function(){
+        var tier = this.game.religion.transcendenceTier + 1;
+        var tt = this.game.religion._getTranscendTotalPrice(tier) - game.religion._getTranscendTotalPrice(tier - 1);
+        var perc = this.game.resPool.get("epiphany").value / tt * 100;
+        perc = Math.round(perc * 1000) / 1000;
+        return perc + "%";
+    },
+
+    // PARAGON :
+
     getParagonProductionBonus: function(){
         var prodRatio = this.game.prestige.getParagonProductionRatio() * 100;
         prodRatio = Math.round(prodRatio * 1000) / 1000;
@@ -569,6 +581,18 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var storeRatio = this.game.prestige.getParagonStorageRatio();
         storeRatio = Math.round(storeRatio * 1000) / 1000;
         return storeRatio + "x";
+    },
+    
+    //TIME : 
+
+    getTCPerSacrifice: function(){
+        var numTCPerSacrifice = 1;
+        numTCPerSacrifice += this.game.getEffect("tcRefineRatio");
+        return numTCPerSacrifice;
+    },
+
+    getRelicPerTCRefine: function(){
+        return 1 + game.getEffect("relicRefineRatio") * game.religion.getZU("blackPyramid").val;
     },
     
     getTradeAmountAvg: function(race){
@@ -627,21 +651,33 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var neededBlazars = Math.max(Math.ceil((neededPerc / basePerc - 1) / .02) , 0);
         return neededBlazars;
     },
+
+    // OTHERS : 
+
+    getBestMagnetoBuilding: function() {
+        var bestBuilding = ["No Building", "Magneto", "Steamworks"];
+        var magneto = this.game.bld.getBuildingExt("magneto").meta;
+        var steamworks = this.game.bld.getBuildingExt("steamworks").meta;
+        if(!magneto.unlocked || !steamworks.unlocked)
+            return bestBuilding[0];
+        var magnetoCount = magneto.val; var steamworksCount = steamworks.val;
+        var productionBonus = (1 + (steamworksCount * 0.15)) * (magnetoCount * 2) ;
+        var prodBonusMagneto = (1 + (steamworksCount * 0.15)) * ((magnetoCount+1) * 2) ;
+        var prodBonusSteam = (1 + ((steamworksCount+1) * 0.15)) * (magnetoCount * 2) ;
+        var magnetoValue = (prodBonusMagneto - productionBonus) / 100 ;
+        var steamworksValue = (prodBonusSteam - productionBonus) / 100 ;
+        if(magnetoValue > steamworksValue)
+            return bestBuilding[1];
+        else if (steamworksValue > magnetoValue)
+            return bestBuilding[2];
+        return bestBuilding[0];
+    },
     
-    getMaxComped: function(){
-        var scienceBldMax = this.game.bld.getEffect("scienceMax");
-        var compCap = this.game.bld.getEffect("scienceMaxCompendia");
-        
-        var IWRatio = this.game.ironWill ? 10 : 1;
-        var blackLibrary = this.game.religion.getTU("blackLibrary");
-        if(this.game.prestige.getPerk("codexLeviathanianus").researched){
-            var ttBoostRatio = (0.05 * (1 + blackLibrary.val * (blackLibrary.effects["compendiaTTBoostRatio"] + this.game.getEffect("blackLibraryBonus"))));
-            IWRatio *= (1 + ttBoostRatio * this.game.religion.transcendenceTier);
-        }
-        
-        var compCapFinal = scienceBldMax * IWRatio + compCap;
-        compCapFinal /= 10;
-        return compCapFinal;
+    getUraniumForThoriumReactors: function(){
+        var needed = 250 * .1875 * this.game.bld.getBuildingExt("reactor").meta.val;
+        needed /= 1 + this.game.getResCraftRatio({name:"thorium"});
+        needed = Math.round(needed * 1000) / 1000;
+        return needed;
     },
 
     getGflops: function(){
@@ -652,131 +688,202 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     //Finally done with calculation functions, now to get down to adding it to the stats tab
     //==============================================================================================================================================
     
-    stats: [
-    {
-        name: "getBestUniBuilding",
-        title: "Best Unicorn Building",
-        val: 0,
+    stats: {
+        catnip: [
+            {
+                name: "getCatnipInWarmSpring",
+                title: "During Warm Spring",
+                val: 0,
+            },
+            {
+                name: "getCatnipColdWinter",
+                title: "During Cold Winter",
+                val: 0,
+            }
+        ],
+        science: [
+            {
+                name: "getCelestialPerDay",
+                title: "Chance of Celestial Events",
+                val: 0,
+            },
+            {
+                name: "getCelestialAutoSuccess",
+                title: "Celestial Event Auto Success Rate",
+                val: 0,
+            },
+            {
+                name: "getMaxComped",
+                title: "Maximum Helpful Compediums",
+                val: 0,
+            },
+            {
+                name: "getBlueprintCraft",
+                title: "Blueprints Per Craft",
+                val: 0,
+            }
+        ],
+        titanium: [
+            {
+                name: "getTitPerZebraTrade",
+                title: "Titanium Per Zebra Trade",
+                val: 0,
+            },
+            {
+                name: "getZebraTradesLeftToMaxTit",
+                title: "Trades Left to Cap Titanium",
+                val: 0,
+            },
+            {
+                name: "getZebraTradesToMaxTit",
+                title: "Max Zebra Trades to Cap Titanium",
+                val: 0,
+            },
+        ],
+        unicorns: [
+            {
+                name: "getBestUniBuilding",
+                title: "Best Unicorn Building",
+                val: 0,
+            },
+            {
+                name: "getBestAliBuilding",
+                title: "Best Alicorn Building Per Ivory Cost",
+                val: 0,
+            },
+            {
+                name: "getNecrocornsPerSecond",
+                title: "Necrocorns Per Second",
+                val: 0,
+            },
+            {
+                name: "getNecrocornTime",
+                title: "Time Until Next Necrocorn",
+                val: 0,
+            },
+            {
+                name: "getLeviChance",
+                title: "Chance per year of Leviathans",
+                val: 0,
+            },
+        ],
+        religion: [
+            {
+                name: "getReligionProductionBonusCap",
+                title: "Solar Revolution Limit",
+                val: 0,
+            },
+            {
+                name: "getApocryphaProgress",
+                title: "Apocrypha Progress",
+                val: 0,
+            },
+            {
+                name: "getNextTranscendTierProgress",
+                title: "Progress to Next Transcendence Tier",
+                val: 0,
+            },
+        ],
+        paragon: [
+            {
+                name: "getParagonProductionBonus",
+                title: "Production Bonus",
+                val: 0,
+            },
+            {
+                name: "getParagonStorageBonus",
+                title: "Storage Bonus",
+                val: 0,
+            },
+        ],
+        time: [
+            {
+                name: "getTCPerSacrifice",
+                title: "Time Crystals per Sacrifice",
+                val: 0,
+            },
+            {
+                name: "getRelicPerTCRefine",
+                title: "Relics Per Time Crystal Refine",
+                val: 0,
+            },
+            {
+                name: "getBlazarsForShatterEngine",
+                title: "Blazars for Shatter Engine",
+                val: 0,
+            },
+        ],
+        others: [
+            {
+                name: "getBestMagnetoBuilding",
+                title: "Best Magneto/Steamwork Building",
+                val: 0,
+            },
+            {
+                name: "getUraniumForThoriumReactors",
+                title: "Uranium/Sec for Thorium Reactors",
+                val: 0,
+            },
+            {
+                name: "getGflops",
+                title: "GFlops",
+                val: 0,
+            },
+        ]  
     },
-    {
-        name: "getUraniumForThoriumReactors",
-        title: "Uranium/Sec for Thorium Reactors",
-        val: 0,
-    },
-    {
-        name: "getBlueprintCraft",
-        title: "Blueprints Per Craft",
-        val: 0,
-    },
-    {
-        name: "getNecrocornsPerSecond",
-        title: "Necrocorns Per Second",
-        val: 0,
-    },
-    {
-        name: "getNecrocornTime",
-        title: "Time Until Next Necrocorn",
-        val: 0,
-    },
-    {
-        name: "getLeviChance",
-        title: "Chance per year of Leviathans",
-        val: 0,
-    },
-    {
-        name: "getReligionProductionBonusCap",
-        title: "Solar Revolution Limit",
-        val: 0,
-    },
-    {
-        name: "getNextTranscendTierProgress",
-        title: "Progress to Next Transcendence Tier",
-        val: 0,
-    },
-    {
-        name: "getCelestialPerDay",
-        title: "Chance of Celestial Events",
-        val: 0,
-    },
-    {
-        name: "getCelestialAutoSuccess",
-        title: "Celestial Event Auto Success Rate",
-        val: 0,
-    },
-    {
-        name: "getTitPerZebraTrade",
-        title: "Titanium Per Zebra Trade",
-        val: 0,
-    },
-    {
-        name: "getZebraTradesToMaxTit",
-        title: "Max Zebra Trades to Cap Titanium",
-        val: 0,
-    },
-    {
-        name: "getZebraTradesLeftToMaxTit",
-        title: "Trades With Zebras Left",
-        val: 0,
-    },
-    {
-        name: "getTCPerSacrifice",
-        title: "Time Crystals per Sacrifice",
-        val: 0,
-    },
-    {
-        name: "getRelicPerTCRefine",
-        title: "Relics Per Time Crystal Refine",
-        val: 0,
-    },
-    {
-        name: "getCatnipInWarmSpring",
-        title: "Catnip/Sec in Warm Spring",
-        val: 0,
-    },
-    {
-        name: "getCatnipColdWinter",
-        title: "Catnip/Sec in Cold Winter",
-        val: 0,
-    },
-    {
-        name: "getParagonProductionBonus",
-        title: "Paragon Production Bonus",
-        val: 0,
-    },
-    {
-        name: "getParagonStorageBonus",
-        title: "Paragon Storage Bonus",
-        val: 0,
-    },
-    {
-        name: "getBlazarsForShatterEngine",
-        title: "Blazars for Shatter Engine",
-        val: 0,
-    },
-    {
-        name: "getGflops",
-        title: "GFlops",
-        val: 0,
-    },
-    {
-        name: "getMaxComped",
-        title: "Maximum Helpful Compediums",
-        val: 0,
-    }],
-    
-    statTitle: "Numbermonster Stats (Accuracy not guaranteed)",
+
+    statDefinitions : [
+        {
+            name: "catnip",
+            title: "Catnip / Sec"
+        },
+        {
+            name: "science",
+            title: "Science"
+        },
+        {
+            name: "titanium",
+            title: "Titanium"
+        },
+        {
+            name: "unicorns",
+            title: "Unicorns"
+        },
+        {
+            name: "religion",
+            title: "Religion"
+        },
+        {
+            name: "paragon",
+            title: "Paragon Bonus"
+        },
+        {
+            name: "time",
+            title: "Time"
+        },
+        {
+            name: "others",
+            title: "Others"
+        }
+    ],
     
     statGroups: null,
     
     constructor: function(game){
         this.game = game;
+        this.statGroups = [];
+        var self = this;
         
-        this.statGroups = [
-            {
-                group: this.stats,
-                title: this.statTitle
+        this.statDefinitions.forEach(
+            function(statDefinition) {
+                self.statGroups.push(
+                    {
+                        group: self.stats[statDefinition.name],
+                        title: statDefinition.title
+                    }
+                )
             }
-        ];
+        )
         
         for(var i in this.statGroups){
             for(var j in this.statGroups[i].group){
