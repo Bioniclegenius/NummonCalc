@@ -555,7 +555,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     getApocryphaProgress: function(){
         var tier = this.game.religion.transcendenceTier + 1;
         var tt = this.game.religion._getTranscendTotalPrice(tier) - game.religion._getTranscendTotalPrice(tier - 1);
-        var worship = this.game.resPool.get("worship").value / 1000000 * tier * tier * 1.01;
+        var worship = this.game.religion.faith / 1000000 * tier * tier * 1.01;
         var perc = worship / tt * 100;
         perc = Math.round(perc * 1000) / 1000;
         return perc + "%";
@@ -564,7 +564,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     getNextTranscendTierProgress: function(){
         var tier = this.game.religion.transcendenceTier + 1;
         var tt = this.game.religion._getTranscendTotalPrice(tier) - game.religion._getTranscendTotalPrice(tier - 1);
-        var perc = this.game.resPool.get("epiphany").value / tt * 100;
+        var perc = this.game.religion.faithRatio / tt * 100;
         perc = Math.round(perc * 1000) / 1000;
         return perc + "%";
     },
