@@ -1,6 +1,66 @@
 dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabManager, {
     
     game: null,
+    lang: "en",
+    i18ng: null,
+    i18nData: {
+        "en": {
+            "best.none": "No Building",
+            "infinity": "Infinity",
+            "sec": "/sec",
+            "getCatnipInWarmSpring": "During Warm Spring",
+            "getCatnipColdWinter": "During Cold Winter",
+            "getCelestialPerDay": "Chance of Celestial Events",
+            "getCelestialAutoSuccess": "Celestial Event Auto Success Rate",
+            "getMaxComped": "Maximum Helpful Compediums",
+            "getBlueprintCraft": "Blueprints Per Craft",
+            "getTitPerZebraTrade": "Titanium Per Zebra Trade",
+            "getZebraTradesLeftToMaxTit": "Trades Left to Cap Titanium",
+            "getZebraTradesToMaxTit": "Max Zebra Trades to Cap Titanium",
+            "getBestUniBuilding": "Best Unicorn Building",
+            "getBestAliBuilding": "Best Alicorn Building Per Ivory Cost",
+            "getNecrocornsPerSecond": "Necrocorns Per Second",
+            "getNecrocornTime": "Time Until Next Necrocorn",
+            "getLeviChance": "Chance per year of Leviathans",
+            "getReligionProductionBonusCap": "Solar Revolution Limit",
+            "getApocryphaProgress": "Apocrypha Progress",
+            "getNextTranscendTierProgress": "Progress to Next Transcendence Tier",
+            "getParagonProductionBonus": "Production Bonus",
+            "getParagonStorageBonus": "Storage Bonus",
+            "getTCPerSacrifice": "Time Crystals per Sacrifice",
+            "getRelicPerTCRefine": "Relics Per Time Crystal Refine",
+            "getBlazarsForShatterEngine": "Blazars for Shatter Engine",
+            "getBestMagnetoBuilding": "Best Magneto/Steamwork Building",
+            "getUraniumForThoriumReactors": "Uranium/Sec for Thorium Reactors",
+            "getGflops": "GFlops",
+            "catnip": "Catnip / Sec",
+            "science": "Science",
+            "titanium": "Titanium",
+            "unicorns": "Unicorns",
+            "religion": "Religion",
+            "paragon": "Paragon Bonus",
+            "time": "Time",
+            "others": "Others",
+        },
+    },
+
+    i18n: function(key, args) {
+        if (key[0] == "$")
+            return this.i18ng(key.slice(1));
+        value = this.i18nData[this.lang][key];
+        if (!value) {
+            value = this.i18nData["en"][key];
+            if (!value) {
+                console.error("key \"" + key + "\" not found");
+                return "$" + key;
+            }
+            console.error("key \"" + key + "\" not found in " + this.lang);
+        }
+        if (args)
+            for (var i = 0; i < args.length; i++)
+                value = value.replace("{"+ i + "}", args[i]);
+        return value;
+    },
     
     roundThisNumber: function(num){
         num*=1000;
@@ -390,9 +450,10 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     // UNICORN :
 
     getBestUniBuilding: function(log=false){
+        var unicornPastureKey = "$buildings.unicornPasture.label";
         var pastureButton = this.getButton(0, "unicornPasture");
         if(typeof pastureButton === "undefined")
-             return "No Building";
+             return this.i18n("best.none");
         var validBuildings = ["unicornTomb","ivoryTower","ivoryCitadel","skyPalace","unicornUtopia","sunspire"];
         var unicornsPerSecond = this.game.getEffect("unicornsPerTickBase") * this.game.getTicksPerSecondUI();
         var globalRatio = this.game.getEffect("unicornsGlobalRatio")+1;
@@ -431,7 +492,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         }
         if(pastureAmor < bestAmoritization){
             bestAmoritization = pastureAmor;
-            bestBuilding = "unicornPasture";
+            bestBuilding = unicornPastureKey;
         }
         for(var i in this.game.tabs[5].zgUpgradeButtons){
             var btn = this.game.tabs[5].zgUpgradeButtons[i];
@@ -481,20 +542,22 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
                 }
             }
         }
-        return bestBuilding;
+        if (bestBuilding != unicornPastureKey)
+            bestBuilding = "religion.zu." + bestBuilding + ".label";
+        return this.i18n(bestBuilding);
     },
 
     getBestAliBuilding: function() {
-        var bestBuilding = ["No Building", "Sky Palace", "Unicorn Utopia", "Sunspire"];
+        var bestBuilding = ["best.none", "$religion.zu.skyPalace.label", "$religion.zu.unicornUtopia.label", "$religion.zu.sunspire.label"];
         if(!this.game.religion.getZU("skyPalace").unlocked)
-            return bestBuilding[0];
+            return this.i18n(bestBuilding[0]);
             
         var skyPalacePrice =  1.15**(this.game.religion.getZU("skyPalace").val) * 125;
         var unicornUtopiaPrice = 1.15**(this.game.religion.getZU("unicornUtopia").val) * 1000;
         var sunspirePrice = 1.15**(this.game.religion.getZU("sunspire").val) * 750;
         var priceBuilding = [skyPalacePrice, unicornUtopiaPrice, sunspirePrice];
 
-        return bestBuilding[ priceBuilding.indexOf(Math.min(...priceBuilding)) + 1 ];
+        return this.i18n(bestBuilding[ priceBuilding.indexOf(Math.min(...priceBuilding)) + 1 ]);
     },
     
     getNecrocornsPerSecond: function(){
@@ -512,8 +575,8 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         corruptionRate *= this.game.getTicksPerSecondUI();
         corruptionRate = Math.floor(corruptionRate * 100000) / 100000;
         if(corruptionRate == Infinity)
-            return "Infinity";
-        return corruptionRate + "/sec";
+            return this.i18n("infinity");
+        return corruptionRate + this.i18n("sec");
     },
 
     getNecrocornTime: function(){
@@ -529,7 +592,7 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
             corruptionRate = 0;
         }
         if(corruptionRate == 0)
-            return "Infinity";
+            return this.i18n("infinity");
         return this.game.toDisplaySeconds( (1 - curCorruption) / (corruptionRate * this.game.getTicksPerSecondUI()) );
     },
 
@@ -655,11 +718,11 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     // OTHERS : 
 
     getBestMagnetoBuilding: function() {
-        var bestBuilding = ["No Building", "Magneto", "Steamworks"];
+        var bestBuilding = ["best.none", "$buildings.magneto.label", "$buildings.steamworks.label"];
         var magneto = this.game.bld.getBuildingExt("magneto").meta;
         var steamworks = this.game.bld.getBuildingExt("steamworks").meta;
         if(!magneto.unlocked || !steamworks.unlocked)
-            return bestBuilding[0];
+            return this.i18n(bestBuilding[0]);
         var magnetoCount = magneto.val; var steamworksCount = steamworks.val;
         var productionBonus = (1 + (steamworksCount * 0.15)) * (magnetoCount * 2) ;
         var prodBonusMagneto = (1 + (steamworksCount * 0.15)) * ((magnetoCount+1) * 2) ;
@@ -667,10 +730,10 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
         var magnetoValue = (prodBonusMagneto - productionBonus) / 100 ;
         var steamworksValue = (prodBonusSteam - productionBonus) / 100 ;
         if(magnetoValue > steamworksValue)
-            return bestBuilding[1];
+            return this.i18n(bestBuilding[1]);
         else if (steamworksValue > magnetoValue)
-            return bestBuilding[2];
-        return bestBuilding[0];
+            return this.i18n(bestBuilding[2]);
+        return this.i18n(bestBuilding[0]);
     },
     
     getUraniumForThoriumReactors: function(){
@@ -869,17 +932,22 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
     
     statGroups: null,
     
-    constructor: function(game){
+    constructor: function(game, i18ng, lang){
         this.game = game;
+        this.i18ng = i18ng;
         this.statGroups = [];
         var self = this;
-        
+        if (lang && this.i18nData[lang])
+            this.lang = lang;
+        else
+            this.lang = "en";
+            
         this.statDefinitions.forEach(
             function(statDefinition) {
                 self.statGroups.push(
                     {
                         group: self.stats[statDefinition.name],
-                        title: statDefinition.title
+                        title: self.i18n(statDefinition.name)
                     }
                 )
             }
@@ -941,7 +1009,7 @@ dojo.declare("classes.tab.NummonTab", com.nuclearunicorn.game.ui.tab, {
                 
                 var tr = dojo.create("tr", null, table);
                 dojo.create("td", {
-                    innerHTML: stat.title
+                    innerHTML: this.game.nummon.i18n(stat.name)
                 }, tr);
                 dojo.create("td", {
                     innerHTML: typeof val == "number" ? this.game.getDisplayValueExt(val) : val
@@ -952,6 +1020,8 @@ dojo.declare("classes.tab.NummonTab", com.nuclearunicorn.game.ui.tab, {
 });
 
 NummonInit = function(){
+    var i18ng = $I;
+    var lang = localStorage["com.nuclearunicorn.kittengame.language"];
     var managers = [
         {
             id: "nummon", class: "NummonStatsManager"
@@ -960,11 +1030,11 @@ NummonInit = function(){
     for(var i in managers){
         var manager = managers[i];
         if(gamePage[manager.id] == undefined){
-            gamePage[manager.id] = new window["classes"]["managers"][manager.class](gamePage);
+            gamePage[manager.id] = new window["classes"]["managers"][manager.class](gamePage, i18ng, lang);
             gamePage.managers.push(gamePage[manager.id]);
         }
         else{
-            gamePage[manager.id] = new window["classes"]["managers"][manager.class](gamePage);
+            gamePage[manager.id] = new window["classes"]["managers"][manager.class](gamePage, i18ng, lang);
         }
     }
     
@@ -1001,4 +1071,13 @@ NummonInit = function(){
     gamePage.ui.render();
 }
 
-NummonInit();
+loadTest = function() {
+    if (typeof gamePage === "undefined") {
+        setTimeout(function(){
+        }, 2000);
+    } else {
+        NummonInit();
+    }
+}
+
+loadTest();
