@@ -199,16 +199,18 @@ dojo.declare("classes.managers.NummonStatsManager", com.nuclearunicorn.core.TabM
             var paragonBonus = this.game.challenges.isActive("winterIsComing") ? 0 : this.game.prestige.getParagonProductionRatio();
             baseProd *= 1 + paragonBonus;
 
-            baseProd *= 1 + this.game.religion.getSolarRevolutionRatio();
+            baseProd *= 1 + this.game.religion.getSolarRevolutionRatio() * (1 + this.game.bld.pollutionEffects["solarRevolutionPollution"]);
 
             baseProd *= 1 + (this.game.getEffect("blsProductionBonus") * this.game.resPool.get("sorrow").value);
             
             baseProd = this.game.calendar.cycleEffectsFestival({catnip: baseProd})['catnip'];
 
+            baseProd *= 1 + this.game.bld.pollutionEffects["catnipPollutionRatio"];
+
             var baseDemand = this.game.village.getResConsumption()['catnip'];
             baseDemand *= 1 + this.game.getEffect("catnipDemandRatio");
             if (this.game.village.sim.kittens.length > 0 && this.game.village.happiness > 1) {
-                var happyCon = Math.max(this.game.village.happiness - 1, 0);
+                var happyCon = Math.max(this.game.village.happiness * (1 + this.game.getEffect("hapinnessConsumptionRatio")) - 1, 0);
                 if (this.game.challenges.isActive("anarchy")) {
                     baseDemand *= 1 + happyCon * (1 + this.game.getEffect("catnipDemandWorkerRatioGlobal"));
                 } else {
@@ -1017,6 +1019,8 @@ NummonInit = function(){
                 return this.nummonTab;
             case "time":
                 return this.timeTab;
+            case "challenges":
+            	return this.challengesTab;
         }
     };
     
